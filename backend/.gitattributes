@@ -1,0 +1,67 @@
+# --------------------------------------------------
+# Default behavior: normalize EOL across platforms
+# --------------------------------------------------
+* text=auto
+
+# --------------------------------------------------
+# Treat common binary files properly (no diff)
+# --------------------------------------------------
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.svg   binary
+*.webp  binary
+*.ico   binary
+
+*.mp3   binary
+*.mp4   binary
+*.wav   binary
+*.ogg   binary
+
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.tar   binary
+*.rar   binary
+
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+
+# --------------------------------------------------
+# Source code files: use LF (recommended for JS/TS)
+# --------------------------------------------------
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.scss  text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+
+# --------------------------------------------------
+# Lock files (should keep CRLF/LF untouched if exist)
+# --------------------------------------------------
+package-lock.json  -text
+yarn.lock          -text
+pnpm-lock.yaml     -text
+
+# --------------------------------------------------
+# Improve merge for common config files
+# --------------------------------------------------
+*.json merge=union
+*.yaml merge=union
+*.yml  merge=union
+
+# --------------------------------------------------
+# Prevent diff on large generated files
+# --------------------------------------------------
+dist/*     binary
+build/*    binary
+public/*   binary
