@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
-import { createCalculation } from "../api/client";
+import { createCalculation, storeAdminToken } from "../api/client";
 
 export default function Home() {
   const nav = useNavigate();
   const [groupName, setGroupName] = useState("");
+  const [adminName, setAdminName] = useState("");
   const [member, setMember] = useState("");
   const [members, setMembers] = useState<string[]>(["Alice", "Bob"]);
   const [loading, setLoading] = useState(false);
@@ -32,9 +33,16 @@ export default function Home() {
       const res = await createCalculation({
         groupName: groupName.trim(),
         participants: members.map((m) => m.trim()).filter(Boolean),
+        adminName: adminName.trim() || undefined,
       });
       const token = res.token!;
-      nav(`/c/${token}`);
+      if (res.adminToken) {
+        storeAdminToken(token, res.adminToken);
+        // carry the admin token in the URL so it can be copied/shared immediately
+        nav(`/c/${token}?admin=${encodeURIComponent(res.adminToken)}`);
+      } else {
+        nav(`/c/${token}`);
+      }
     } catch (e: any) {
       setError(e?.message ?? "Errore");
     } finally {
@@ -61,6 +69,17 @@ export default function Home() {
               placeholder="Es. Weekend a Roma"
               autoFocus
             />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Il tuo nome (admin)</label>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              value={adminName}
+              onChange={(e) => setAdminName(e.target.value)}
+              placeholder="Es. Mario"
+            />
+            <p className="mt-2 text-xs text-slate-500">Chi crea il calcolo riceve un link admin per modificare le spese.</p>
           </div>
 
           <div>

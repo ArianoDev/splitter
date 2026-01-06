@@ -1,0 +1,22 @@
+# General
+.DS_Store
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+dist
+frontend/dist
+backend/dist
+
+# Env
+.env
+backend/.env
+frontend/.env
+
+# Mongo volume (docker)
+mongo_data

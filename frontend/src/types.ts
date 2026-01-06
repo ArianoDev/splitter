@@ -12,11 +12,18 @@ export type Expense = {
   createdAt?: string;
 };
 
+export type Admin = {
+  id: string;
+  name: string;
+  createdAt?: string;
+};
+
 export type Calculation = {
   token: string;
   groupName: string;
   participants: Participant[];
   expenses: Expense[];
+  admins?: Admin[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -44,4 +51,4 @@ export type Summary = {
 export type ApiResponse<T> = {
   calculation: Calculation;
   summary: Summary;
-} & Partial<{ token: string }>;
+} & Partial<{ token: string; adminToken: string; canEdit: boolean }>;

@@ -20,12 +20,24 @@ const ExpenseSchema = new Schema(
   { _id: false }
 );
 
+const AdminSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    // sha256(adminToken) in hex
+    tokenHash: { type: String, required: true },
+    createdAt: { type: Date, default: () => new Date() },
+  },
+  { _id: false }
+);
+
 const CalculationSchema = new Schema(
   {
     token: { type: String, required: true, unique: true, index: true },
     groupName: { type: String, required: true },
     participants: { type: [ParticipantSchema], required: true, default: [] },
     expenses: { type: [ExpenseSchema], required: true, default: [] },
+    admins: { type: [AdminSchema], required: true, default: [] },
   },
   { timestamps: true }
 );

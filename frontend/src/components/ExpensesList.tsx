@@ -9,8 +9,9 @@ export default function ExpensesList(props: {
   summary: Summary;
   onUpdate: (calc: Calculation, summary: Summary) => void;
   onEdit: (expense: Expense) => void;
+  canEdit: boolean;
 }) {
-  const { token, calculation, onUpdate, onEdit } = props;
+  const { token, calculation, onUpdate, onEdit, canEdit } = props;
 
   const [busyId, setBusyId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export default function ExpensesList(props: {
   const nameById = useMemo(() => new Map(calculation.participants.map((p) => [p.id, p.name] as const)), [calculation.participants]);
 
   async function onDelete(expenseId: string) {
+    if (!canEdit) return;
     if (!confirm("Eliminare questa spesa?")) return;
     setErr(null);
     setBusyId(expenseId);
@@ -33,6 +35,11 @@ export default function ExpensesList(props: {
 
   return (
     <div className="space-y-3">
+      {!canEdit ? (
+        <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          Sei in <span className="font-medium">sola lettura</span>. Serve un link admin per modificare o eliminare spese.
+        </p>
+      ) : null}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold">Spese</h2>
         <p className="text-xs text-slate-500">{calculation.expenses.length} voci</p>
@@ -63,14 +70,14 @@ export default function ExpensesList(props: {
                       <button
                         className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50"
                         onClick={() => onEdit(e)}
-                        disabled={busyId !== null}
+                        disabled={!canEdit || busyId !== null}
                       >
                         Modifica
                       </button>
                       <button
                         className="rounded-md border px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
                         onClick={() => onDelete(e.id)}
-                        disabled={busyId === e.id}
+                        disabled={!canEdit || busyId === e.id}
                       >
                         {busyId === e.id ? "..." : "Elimina"}
                       </button>

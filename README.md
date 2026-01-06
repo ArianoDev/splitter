@@ -6,8 +6,9 @@ Webapp per dividere spese di gruppo in modo semplice e trasparente:
 - Puoi **escludere** persone da una singola spesa (checkbox)
 - Il backend calcola saldi e suggerisce **chi deve pagare quanto e a chi**, con poche transazioni
 - I dati sono salvati su MongoDB e accessibili tramite un **token nel link**, senza registrazione
+- Il link "normale" è **sola lettura**; per modificare servono uno o più **link admin**
 
-> ⚠️ Chi ha il link può modificare: trattalo come una chiave condivisa.
+> 🔐 Il link admin è la chiave: condividilo solo con chi deve poter modificare.
 
 ---
 
@@ -83,6 +84,11 @@ Collezione: `calculations`
 - `participants`: array `{ id, name }`
 - `expenses`: array `{ id, description, amountCents, payerId, participantIds, createdAt }`
 
+Per la gestione permessi:
+
+- `admins`: array `{ id, name, tokenHash, createdAt }`
+  - `tokenHash` è `sha256(adminToken)` (in hex). Il token reale non viene salvato in chiaro.
+
 Importi sempre in **cent** (`amountCents`) per evitare problemi di floating point.
 
 ---
@@ -92,11 +98,20 @@ Importi sempre in **cent** (`amountCents`) per evitare problemi di floating poin
 Base URL: `/api`
 
 - `POST /api/calculations`
-  - body: `{ groupName: string, participants: string[] }`
-  - response: `{ token, calculation, summary }`
+  - body: `{ groupName: string, participants: string[], adminName?: string }`
+  - response: `{ token, adminToken, canEdit: true, calculation, summary }`
 
 - `GET /api/calculations/:token`
-  - response: `{ calculation, summary }`
+  - opzionale header: `x-admin-token: <adminToken>`
+  - response: `{ calculation, summary, canEdit }`
+
+### Mutazioni (richiedono admin)
+
+Per tutte le rotte qui sotto, includi l'header:
+
+```
+x-admin-token: <adminToken>
+```
 
 - `PATCH /api/calculations/:token`
   - body: `{ groupName?: string }`
@@ -113,6 +128,19 @@ Base URL: `/api`
   - body: `{ description?, amountCents, payerId, participantIds }`
 
 - `DELETE /api/calculations/:token/expenses/:expenseId`
+
+### Gestione admin (uno o più admin)
+
+- `GET /api/calculations/:token/admins` (richiede admin)
+  - response: `{ admins: [{ id, name, createdAt }] }`
+
+- `POST /api/calculations/:token/admins` (richiede admin)
+  - body: `{ name: string }`
+  - response: `{ calculation, summary, adminToken, admin }`
+  - Nota: `adminToken` viene mostrato **solo una volta**.
+
+- `DELETE /api/calculations/:token/admins/:adminId` (richiede admin)
+  - Non è possibile rimuovere l'ultimo admin.
 
 La risposta include sempre `summary` (saldi + trasferimenti) calcolata dal backend.
 
@@ -155,6 +183,5 @@ File: `backend/tests/settlement.test.ts`
 
 - “Tour” iniziale: overlay guidato al primo accesso
 - Export CSV/JSON
-- Aggiungere funzionalità per saldare un debito
 - Miglior gestione rimozione partecipante (wizard che aggiorna spese correlate)
 

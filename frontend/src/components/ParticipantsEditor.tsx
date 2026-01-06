@@ -7,8 +7,9 @@ export default function ParticipantsEditor(props: {
   calculation: Calculation;
   summary: Summary;
   onUpdate: (calc: Calculation, summary: Summary) => void;
+  canEdit: boolean;
 }) {
-  const { token, calculation, onUpdate } = props;
+  const { token, calculation, onUpdate, canEdit } = props;
 
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -19,6 +20,7 @@ export default function ParticipantsEditor(props: {
   const groupChanged = useMemo(() => groupName.trim() !== calculation.groupName.trim(), [groupName, calculation.groupName]);
 
   async function onSaveGroupName() {
+    if (!canEdit) return;
     setErr(null);
     setBusy(true);
     try {
@@ -32,6 +34,7 @@ export default function ParticipantsEditor(props: {
   }
 
   async function onAdd() {
+    if (!canEdit) return;
     const clean = newName.trim().replace(/\s+/g, " ");
     if (!clean) return;
     setErr(null);
@@ -48,6 +51,7 @@ export default function ParticipantsEditor(props: {
   }
 
   async function onRemove(participantId: string) {
+    if (!canEdit) return;
     if (!confirm("Rimuovere questo partecipante?")) return;
     setErr(null);
     setBusy(true);
@@ -63,14 +67,24 @@ export default function ParticipantsEditor(props: {
 
   return (
     <div className="space-y-4">
+      {!canEdit ? (
+        <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          Sei in <span className="font-medium">sola lettura</span>. Serve un link admin per modificare gruppo e partecipanti.
+        </p>
+      ) : null}
       <div>
         <label className="text-sm font-medium">Nome del gruppo</label>
         <div className="mt-1 flex gap-2">
-          <input className="w-full rounded-md border px-3 py-2" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
+          <input
+            className="w-full rounded-md border px-3 py-2 disabled:bg-slate-50"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            disabled={!canEdit || busy}
+          />
           <button
             className="rounded-md border bg-white px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
             onClick={onSaveGroupName}
-            disabled={busy || !groupChanged}
+            disabled={!canEdit || busy || !groupChanged}
           >
             Salva
           </button>
@@ -87,6 +101,7 @@ export default function ParticipantsEditor(props: {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Nome"
+                disabled={!canEdit || busy}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -94,7 +109,11 @@ export default function ParticipantsEditor(props: {
                   }
                 }}
               />
-              <button className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50" onClick={onAdd} disabled={busy}>
+              <button
+                className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50"
+                onClick={onAdd}
+                disabled={!canEdit || busy}
+              >
                 Aggiungi
               </button>
             </div>
@@ -105,7 +124,11 @@ export default function ParticipantsEditor(props: {
           {calculation.participants.map((p) => (
             <li key={p.id} className="flex items-center justify-between rounded-md border px-3 py-2">
               <span className="text-sm">{p.name}</span>
-              <button className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50" onClick={() => onRemove(p.id)} disabled={busy}>
+              <button
+                className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                onClick={() => onRemove(p.id)}
+                disabled={!canEdit || busy}
+              >
                 Rimuovi
               </button>
             </li>
