@@ -12,7 +12,6 @@ import {
 import { HttpError } from "../utils/httpError";
 import { computeSummary } from "../services/settlement";
 import { generateAdminToken, hashAdminToken, safeEqualHash } from "../utils/adminToken";
-import { log } from "console";
 
 export const calculationsRouter = Router();
 
