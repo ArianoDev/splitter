@@ -34,31 +34,6 @@ export default function ShareLink({ token, canEdit }: { token: string; canEdit: 
     }
   }
 
-  async function nativeShare() {
-    // @ts-expect-error - Web Share API not in all TS libs
-    const canShare = typeof navigator.share === "function";
-    if (!canShare) return;
-    try {
-      // @ts-expect-error - Web Share API
-      await navigator.share({
-        title: "Calcolo spese di gruppo",
-        text: "Ecco il link del calcolo:",
-        url: viewLink,
-      });
-    } catch {
-      // user cancelled, ignore
-    }
-  }
-
-  const mailto = useMemo(() => {
-    const subject = encodeURIComponent("Calcolo spese di gruppo");
-    const body = encodeURIComponent(`Ecco il link per vedere il calcolo:
-
-${viewLink}
-`);
-    return `mailto:?subject=${subject}&body=${body}`;
-  }, [viewLink]);
-
   const whatsapp = useMemo(() => {
     const text = encodeURIComponent(`Ecco il link del calcolo spese (sola lettura):
 ${viewLink}`);
@@ -98,12 +73,6 @@ ${viewLink}`);
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <button className="rounded-md border bg-white px-3 py-2 text-sm hover:bg-slate-50" onClick={nativeShare} type="button">
-          Condividi…
-        </button>
-        <a className="rounded-md border bg-white px-3 py-2 text-sm hover:bg-slate-50" href={mailto}>
-          Email
-        </a>
         <a className="rounded-md border bg-white px-3 py-2 text-sm hover:bg-slate-50" href={whatsapp} target="_blank" rel="noreferrer">
           WhatsApp
         </a>
