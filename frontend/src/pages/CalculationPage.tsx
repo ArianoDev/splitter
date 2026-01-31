@@ -192,7 +192,7 @@ export default function CalculationPage() {
         </Card>
 
         <Card>
-          <SummaryView summary={summary} />
+          <SummaryView token={token} summary={summary} onUpdate={onUpdate} />
         </Card>
       </div>
 

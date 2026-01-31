@@ -1,7 +1,29 @@
-import type { Summary } from "../types";
+import { addExpense } from "../api/client";
+import type { Calculation, Summary } from "../types";
 import { formatCents } from "../utils/money";
 
-export default function SummaryView({ summary }: { summary: Summary }) {
+export default function SummaryView(props:{ 
+ token: string; 
+ summary: Summary;
+ onUpdate: (calc: Calculation, summary: Summary) => void; 
+}) {
+
+  const { token, summary, onUpdate} = props;
+
+  async function onSubmit(amountCents: number, payerId: string, selectedIds: string[]) {
+    try {
+      const res = await addExpense(token, {
+        description: "Saldo",
+        amountCents,
+        payerId,
+        participantIds: selectedIds,
+      });
+      onUpdate(res.calculation, res.summary);
+    } catch (e: any) {
+      console.log(e?.message ?? "Errore");
+    }
+  }
+
   const sortedBalances = [...summary.balances].sort((a, b) => b.balanceCents - a.balanceCents);
 
   return (
@@ -48,6 +70,12 @@ export default function SummaryView({ summary }: { summary: Summary }) {
                   <span className="font-medium">{t.fromName}</span> → <span className="font-medium">{t.toName}</span>
                 </span>
                 <span className="font-semibold">{formatCents(t.amountCents)}</span>
+                <button
+                        className="rounded-md border bg-white px-2 py-1 text-xs hover:bg-slate-50"
+                        onClick={() => onSubmit(t.amountCents, t.fromId, [t.toId])}
+                      >
+                        Salda
+                </button>
               </li>
             ))}
           </ul>
